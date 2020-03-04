@@ -5,16 +5,44 @@ require 'json'
 
 module DomoRubySdk
   class Error < StandardError; end
+
+  class SdkException < Exception
+    def initialize(message)
+      super(message)
+    end
+
+    # returns a ops user readable stacktrace.
+    def stacktrace(ex)
+      ex.backtrace.select do |t| 
+        (t =~ /gem/) == nil && (t =~ /rvm/) == nil
+      end.join('\n')
+    end
+  end
+
+  class HttpException < SdkException
+    attr_reader :status_code
+    attr_reader :server_error
+
+    def initialize(status_code, message)
+      @status_code = status_code
+      @server_error = message
+      super(message)
+    end
+
+    def to_s
+      return "API Request Failed. HTTP " + self.status_code.to_s + " -> " + self.server_error 
+    end
+
+  end
   
   class Api
     @@auth_endpoint = 'https://api.domo.com/oauth/token'
     @@datasets_endpoint = 'https://api.domo.com/v1/datasets'
     @@streams_endpoint = 'https://api.domo.com/v1/streams'
 
-
-    def initialize(props = {})
-      @client_id = props[:client_id]
-      @client_secret = props[:client_secret]
+    def initialize(client_id, client_secret)
+      @client_id = client_id
+      @client_secret = client_secret
     end
 
     def access_token
@@ -28,7 +56,7 @@ module DomoRubySdk
     # gets the access token for the API
     def authenticate
       if !@client_id || !@client_secret
-        raise BmdiExceptions::Forbidden.new('missing parameters: client_id, client_secret')
+        raise SdkException.new('missing parameters: client_id, client_secret')
       end
       url_with_params = @@auth_endpoint + '?grant_type=client_credentials&scope=data'
       response = RestClient::Request.execute(
@@ -70,7 +98,7 @@ module DomoRubySdk
         headers: headers
       )
       if response.code != 200
-        raise BmdiExceptions::HttpException(response.status, response.message)
+        raise SdkException::HttpException(response.status, response.message)
       end
       return response.body
     end
@@ -227,11 +255,9 @@ module DomoRubySdk
       headers = {
         'Content-Type': content_type,
         'Authorization': "Bearer #{@access_token}",
-        'Accept': 'application/json'
+        'Accept': 'application/json', 
+        'accept-encoding': 'None'
       }
-      if !ConfigService.production?
-        headers['accept-encoding'] = 'None'
-      end
       headers
     end
   end
