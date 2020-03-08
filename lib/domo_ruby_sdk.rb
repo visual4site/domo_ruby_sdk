@@ -4,9 +4,8 @@ require 'rest-client'
 require 'json'
 
 module DomoRubySdk
-  class Error < StandardError; end
 
-  class SdkException < Exception
+  class SdkException < StandardError
     def initialize(message)
       super(message)
     end
