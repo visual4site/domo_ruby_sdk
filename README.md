@@ -21,15 +21,14 @@ Or install it yourself as:
 
 ## Usage
 
-Please review the ./spec/domo_ruby_sdk_spec.rb for usage examples. Here you can:
+Please review the ./spec/domo_dataset_spec.rb for usage examples. Here you can:
 
 * authenticate with domo
 * create a dataset
 * delete a dataset
-* fetch list of datasets
-* create dataset stream
-* publish to dataset stream
-* finalize dataset stream
+* update a dataset
+* append to a dataset
+* get dataset metadata
 
 
 

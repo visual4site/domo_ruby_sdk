@@ -3,8 +3,8 @@ require_relative 'lib/domo_ruby_sdk/version'
 Gem::Specification.new do |spec|
   spec.name          = "domo_ruby_sdk"
   spec.version       = DomoRubySdk::VERSION
-  spec.authors       = ["Ryan Grow"]
-  spec.email         = ["ryan.grow@bluemoondigital.co"]
+  spec.authors       = ["Sam Spence"]
+  spec.email         = ["sam.spence@bluemoondigital.co"]
 
   spec.summary       = "A ruby interface for invoking the Domo Data API endpoints."
   spec.homepage      = "https://github.com/visual4site/domo_ruby_sdk"
