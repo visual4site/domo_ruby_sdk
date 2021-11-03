@@ -54,7 +54,7 @@ module DomoRubySdk
 
     # gets the access token for the API
     def authenticate
-      if !@client_id || !@client_secret
+      if @client_id.length < 1 || @client_secret.length < 1
         raise SdkException.new('missing parameters: client_id, client_secret')
       end
       url_with_params = @@auth_endpoint + '?grant_type=client_credentials&scope=data'
@@ -78,7 +78,7 @@ module DomoRubySdk
         method: :get,
         headers: headers('application/json')
       )
-      return JSON.parse(response.body)
+      return response
     end
 
 
@@ -122,8 +122,6 @@ module DomoRubySdk
       payload = {
         name: name,
         description: description,
-        rows: 0,
-        columns: columns.length
       }
       schema = {columns: []}
       columns.each { |col| schema[:columns].push(col) }
@@ -137,6 +135,20 @@ module DomoRubySdk
       return JSON.parse(response.body)
     end
 
+    def update_dataset(dataset_id, columns)
+      authenticate unless authenticated?
+      payload = {}
+      schema = {columns: []}
+      columns.each { |col| schema[:columns].push(col) }
+      payload[:schema] = schema
+      response = RestClient::Request.execute(
+        url: "#{@@datasets_endpoint}/#{dataset_id}",
+        method: :put,
+        headers: headers('application/json'),
+        payload: JSON.generate(payload)
+      )
+      return JSON.parse(response.body)
+    end
 
     # a non-stream write of data to a dataset. useful for only small
     # amounts of data.
@@ -147,7 +159,7 @@ module DomoRubySdk
         'Authorization': "Bearer #{@access_token}",
         'Accept': 'application/json'
       }
-      endpoint = "#{@@datasets_endpoint}/#{dataset_id}/data"
+      endpoint = "#{@@datasets_endpoint}/#{dataset_id}/data?updateMethod=APPEND"
       response = RestClient::Request.execute(
         url: endpoint,
         method: :put,
@@ -239,11 +251,12 @@ module DomoRubySdk
     # up after tests.
     def delete_dataset(domo_dataset_id)
       authenticate unless authenticated?
-      RestClient::Request.execute(
+      response = RestClient::Request.execute(
         url: "#{@@datasets_endpoint}/#{domo_dataset_id}",
         method: :delete,
         headers: headers('application/json')
       )
+      return response
     end
 
     @access_token = nil
