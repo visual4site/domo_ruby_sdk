@@ -70,6 +70,15 @@ RSpec.describe DomoRubySdk, vcr: true do
       expect(resp['columns']).to eq 3
       expect(resp['rows']).to eq 3
     end
+    it "queries dataset and replaces data" do
+      csv_string = domo.query_dataset($dataset_id)
+      resp = domo.replace_dataset($dataset_id,csv_string)
+      expect(resp.code).to eq 204
+      sleep(5)
+      resp = domo.get_dataset_metadata($dataset_id)
+      expect(resp['columns']).to eq 3
+      expect(resp['rows']).to eq 3
+    end
     it "deletes dataset" do
       resp = domo.delete_dataset($dataset_id)
       expect(resp.code).to eq 204

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    domo_ruby_sdk (0.1.0)
+    domo_ruby_sdk (0.2.0)
       rest-client (~> 2.0)
 
 GEM

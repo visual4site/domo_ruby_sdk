@@ -150,7 +150,7 @@ module DomoRubySdk
       return JSON.parse(response.body)
     end
 
-    # a non-stream write of data to a dataset. useful for only small
+    # a non-stream append of data to a dataset. useful for only small
     # amounts of data.
     def append_dataset(dataset_id, csv_data)
       authenticate unless authenticated?
@@ -160,6 +160,25 @@ module DomoRubySdk
         'Accept': 'application/json'
       }
       endpoint = "#{@@datasets_endpoint}/#{dataset_id}/data?updateMethod=APPEND"
+      response = RestClient::Request.execute(
+        url: endpoint,
+        method: :put,
+        headers: headers,
+        payload: csv_data
+      )
+      return response
+    end
+
+    # a non-stream replace of data to a dataset. useful for only small
+    # amounts of data.
+    def replace_dataset(dataset_id, csv_data)
+      authenticate unless authenticated?
+      headers = {
+        'Content-Type': 'text/csv',
+        'Authorization': "Bearer #{@access_token}",
+        'Accept': 'application/json'
+      }
+      endpoint = "#{@@datasets_endpoint}/#{dataset_id}/data"
       response = RestClient::Request.execute(
         url: endpoint,
         method: :put,
